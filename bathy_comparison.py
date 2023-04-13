@@ -11,6 +11,7 @@ Comparison of bathymetry results:
 # %% Libraries
 import pandas as pd
 import os
+import numpy as np
 from sklearn.metrics import mean_absolute_error as mae
 from sklearn.metrics import mean_squared_error as mse
 from sklearn.metrics import mean_absolute_percentage_error as mape
@@ -62,3 +63,17 @@ for b in bat_df.columns[2::]:
     gm_df.loc[idx[1]][b] = round((bat_df[b]-bat_df['2019']).sum()*100/1000000,3)        # Total sediment volume
     gm_df.loc[idx[2]][b] = round(bat_dep_df[b].mean(),2)                                # Average elevation
 
+# %% Histogram for depth values
+
+bathys = list(bat_df.columns[2::])
+bin_edges = np.arange(0, bat_df[bathys].max().max() + 1)                        # Set the bin edges
+
+# Generate the histograms
+hist_values = {}
+for col in bathys:
+    hist, _ = np.histogram(bat_df[col].dropna(), bins=bin_edges)
+    hist_values[col] = hist
+
+# Create a dataframe from the histogram values
+hist_df = pd.DataFrame(hist_values)
+hist_df = hist_df.set_index(pd.Index(bin_edges[:-1]))
